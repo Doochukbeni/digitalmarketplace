@@ -24,10 +24,13 @@ const page = () => {
     resolver: zodResolver(AuthCredentialValidator),
   });
 
-  // const { data } = trpc.anyApiRoute.useQuery();
-  // console.log(data);
+  const { mutate, isLoading } = trpc.auth.createPayloadUser.useMutation({});
 
-  const onSubmit = ({ email, password }: TAuthCredentialValidator) => {};
+  const onSubmit = ({ email, password }: TAuthCredentialValidator) => {
+    mutate({ email, password });
+    console.log(email, password);
+  };
+
   return (
     <div className="container relative flex p-20 flex-col items-center justify-center lg:px-0">
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
@@ -60,6 +63,7 @@ const page = () => {
               <div className="grid gap-1 py-2">
                 <Label htmlFor="password">Password</Label>
                 <Input
+                  type="password"
                   {...register("password")}
                   className={cn({
                     "focus-visible:ring-red-500": errors.password,
