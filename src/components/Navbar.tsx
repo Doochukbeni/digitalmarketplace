@@ -6,6 +6,7 @@ import Cart from "@/components/Cart";
 import { buttonVariants } from "@/components/ui/Button";
 import { getServerSideUser } from "@/lib/payload.utils";
 import { cookies } from "next/headers";
+import UserAccountNav from "./UserAccountNav";
 
 const Navbar = async () => {
   const nextCookies = cookies();
@@ -43,7 +44,9 @@ const Navbar = async () => {
                   )}
 
                   {user ? (
-                    <div></div>
+                    <div>
+                      <UserAccountNav user={user} />
+                    </div>
                   ) : (
                     <Link
                       href="/sign-up"
