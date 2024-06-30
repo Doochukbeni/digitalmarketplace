@@ -42,7 +42,7 @@ const SignIn = () => {
     onSuccess: () => {
       toast.success("signed in successfully");
 
-      router.refresh();
+      // router.refresh();
 
       if (origin) {
         router.push(`/${origin}`);
@@ -55,6 +55,7 @@ const SignIn = () => {
       }
 
       router.push("/");
+      router.refresh();
     },
     onError: (err) => {
       if (err.data?.code === "UNAUTHORIZED") {
@@ -65,7 +66,6 @@ const SignIn = () => {
 
   const onSubmit = ({ email, password }: TAuthCredentialValidator) => {
     signIn({ email, password });
-    console.log(email, password);
   };
 
   return (
