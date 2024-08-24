@@ -5,6 +5,7 @@ import ProductReel from "@/components/ProductReel";
 import { PRODUCT_CATEGORIES } from "@/config";
 import { getPayloadClient } from "@/get-payload";
 import { formatPrice } from "@/lib/utils";
+import { Product } from "@/payload-types";
 import { Check, Shield } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -33,7 +34,7 @@ const page = async ({ params }: PageProps) => {
 
   const payload = await getPayloadClient();
 
-  const { docs: products } = await payload.find({
+  const { docs: products } = (await payload.find({
     collection: "products",
     limit: 1,
     where: {
@@ -44,10 +45,9 @@ const page = async ({ params }: PageProps) => {
         equals: "approved",
       },
     },
-  });
+  })) as unknown as { docs: Product[] };
 
   const [product] = products;
-  console.log("products:", product);
 
   if (!product) return notFound();
 
@@ -125,7 +125,7 @@ const page = async ({ params }: PageProps) => {
 
           {/* product image  */}
 
-          <div className="mt-10 lg:col-start-2 lg:row-start-2 lg:mt-0 lg:self-center">
+          <div className="mt-10 lg:col-start-2 lg:row-span-2 lg:mt-0 lg:self-center">
             <div className="aspect-square rounded-lg">
               <ImageSlider urls={validUrls} />
             </div>
@@ -158,7 +158,7 @@ const page = async ({ params }: PageProps) => {
         href="/product"
         query={{ category: product.category, limit: 4 }}
         title={`Similar ${label}`}
-        subtitle={`Browse similar high-quality ${label} just like ${product.name}`}
+        subtitle={`Browse similar high-quality ${label} just like "${product.name}"`}
       />
     </MaxWidthWrapper>
   );

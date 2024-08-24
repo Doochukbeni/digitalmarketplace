@@ -17,12 +17,13 @@ interface ImageSliderProps {
 const ImageSlider = ({ urls }: ImageSliderProps) => {
   const [swiper, setSwiper] = useState<null | SwiperType>(null);
 
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
 
   const [slideConfig, setSlideConfig] = useState({
     isBeginning: true,
     isEnd: activeIndex === (urls.length ?? 0) - 1,
   });
+
   useEffect(() => {
     swiper?.on("slideChange", ({ activeIndex }) => {
       setActiveIndex(activeIndex);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "./ui/Button";
+import { Button } from "@/components/ui/Button";
 import { useCart } from "@/hooks/use-cart";
 import { Product } from "@/payload-types";
 
@@ -25,7 +25,7 @@ const AddToCartButton = ({ product }: { product: Product }) => {
       size="lg"
       className="w-full"
     >
-      {isSuccess ? "Added to cart" : "Add to cart"}
+      {isSuccess ? "Added!" : "Add to cart"}
     </Button>
   );
 };
