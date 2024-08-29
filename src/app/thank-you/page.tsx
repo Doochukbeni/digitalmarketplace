@@ -1,12 +1,13 @@
-import { getServerSideUser } from "@/lib/payload.utils";
-import Image from "next/image";
-import { cookies } from "next/headers";
-import { getPayloadClient } from "@/get-payload";
-import { notFound, redirect } from "next/navigation";
-import { Order, Product, ProductFile } from "@/payload-types";
+import PaymentStatus from "@/components/PaymentStatus";
 import { PRODUCT_CATEGORIES } from "@/config";
+import { getPayloadClient } from "@/get-payload";
+import { getServerSideUser } from "@/lib/payload.utils";
 import { formatPrice } from "@/lib/utils";
+import { Order, Product, ProductFile, User } from "@/payload-types";
+import { cookies } from "next/headers";
+import Image from "next/image";
 import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
 
 interface PageProps {
   searchParams: {
@@ -155,6 +156,12 @@ const ThankYouPage = async ({ searchParams }: PageProps) => {
               <p className="text-base">{formatPrice(orderTotal + 1)} </p>
             </div>
           </div>
+
+          <PaymentStatus
+            isPaid={order._isPaid}
+            orderEmail={(order.user as User).email}
+            orderId={order.id}
+          />
 
           <div className="mt-16 border-t border-gray-200 py-6 text-right">
             <Link

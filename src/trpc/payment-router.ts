@@ -2,8 +2,8 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getPayloadClient } from "../get-payload";
 import { stripe } from "../lib/stripe";
-import { privateProcedure, router } from "./trpc";
-import { Product } from "@/payload-types";
+import { privateProcedure, publicProcedure, router } from "./trpc";
+import { Order, Product } from "@/payload-types";
 import Stripe from "stripe";
 
 export const paymentRouter = router({
@@ -77,5 +77,30 @@ export const paymentRouter = router({
         console.log("stripe session error:", error);
         return { url: null };
       }
+    }),
+
+  pollOrderStatus: privateProcedure
+    .input(z.object({ orderId: z.string() }))
+    .query(async ({ input }) => {
+      const { orderId } = input;
+
+      const payload = await getPayloadClient();
+
+      const { docs: orders } = (await payload.find({
+        collection: "orders",
+        where: {
+          id: {
+            equals: orderId,
+          },
+        },
+      })) as unknown as { docs: Order[] };
+
+      if (!orders.length) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const [order] = orders;
+
+      return { isPaid: order._isPaid };
     }),
 });
