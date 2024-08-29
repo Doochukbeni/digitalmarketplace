@@ -8,19 +8,20 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/Sheet";
-import { ShoppingCart } from "lucide-react";
-import { Separator } from "./ui/Separator";
-import { formatPrice } from "@/lib/utils";
-import Link from "next/link";
-import { buttonVariants } from "./ui/Button";
-import Image from "next/image";
 import { useCart } from "@/hooks/use-cart";
-import CartItem from "./CartItem";
-import { ScrollArea } from "./ui/scroll-area";
+import { formatPrice } from "@/lib/utils";
+import { ShoppingCart } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import CartItem from "./CartItem";
+import { buttonVariants } from "./ui/Button";
+import { ScrollArea } from "./ui/scroll-area";
+import { Separator } from "./ui/Separator";
 
 const Cart = () => {
   const { items } = useCart();
+
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {

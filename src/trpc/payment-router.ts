@@ -4,6 +4,7 @@ import { getPayloadClient } from "../get-payload";
 import { stripe } from "../lib/stripe";
 import { privateProcedure, router } from "./trpc";
 import { Product } from "@/payload-types";
+import Stripe from "stripe";
 
 export const paymentRouter = router({
   createSession: privateProcedure
@@ -35,15 +36,46 @@ export const paymentRouter = router({
         collection: "orders",
         data: {
           _isPaid: false,
-          products: filteredProducts,
+          products: filteredProducts.map((prod) => prod.id),
           user: user.id,
+        },
+      });
+
+      const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
+      filteredProducts.forEach((product) => {
+        line_items.push({
+          price: product.priceId!,
+          quantity: 1,
+        });
+      });
+
+      line_items.push({
+        price: "price_1PrIH9ABTdl9oQxnRFvW33qy",
+        quantity: 1,
+        adjustable_quantity: {
+          enabled: false,
         },
       });
 
       try {
         const stripeSession = await stripe.checkout.sessions.create({
           success_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/thank-you?orderId=${order.id}`,
+          cancel_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/cart`,
+          payment_method_types: ["card"],
+          mode: "payment",
+          metadata: {
+            userId: user.id,
+            orderId: order.id,
+          },
+          line_items,
         });
-      } catch (error) {}
+
+        return {
+          url: stripeSession.url,
+        };
+      } catch (error) {
+        console.log("stripe session error:", error);
+        return { url: null };
+      }
     }),
 });
