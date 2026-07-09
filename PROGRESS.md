@@ -114,12 +114,35 @@ Payload API `app/(payload)/api/...`, tRPC + webhooks as route handlers), R2 for 
 (`next build` only). Keep Mongo + Slate; `/admin` route. **Auth left native only long enough to boot;
 replaced in F2.** Spike first to verify Payload 3 API specifics.
 - [x] **F1.0** Materialize tracker → repo `PROGRESS.md` + commit
-- [ ] **F1.1** Spike: verify Payload 3 (init, route mounts, hook/access signatures, Slate v3, R2 adapter, Node≥20)
+- [x] **F1.1** Spike: Payload 3 APIs verified against current docs (see findings below)
 - [ ] **F1.2** Spec + eng-review
 - [ ] **F1.3** Deps + `payload.config.ts` (no webpack; Mongo, Slate, R2; `/admin`)
 - [ ] **F1.4** Port collections; Payload 3 init; admin/api routes; delete Express plumbing + dist + scripts
 - [ ] **F1.5** R2 image storage; `next.config.mjs` remotePatterns
 - [ ] **F1.6** Green local run + green Vercel preview
+
+#### F1.1 Spike findings (verified against Payload docs, v3.85 era)
+- **Init:** `import { getPayload } from 'payload'` + `import config from '@payload-config'` →
+  `await getPayload({ config })`. Replaces the Express `payload.init` singleton in `get-payload.ts`.
+- **App Router mounts:** admin + REST/GraphQL live in an `app/(payload)/` route group whose files
+  (layout, `admin/[[...segments]]/page.tsx`, `api/[...slug]/route.ts`, `importMap.js`) are **generated
+  boilerplate** from the Payload 3 Next template — copy them in, don't hand-write. Route bases are
+  configurable via `routes.{admin,api,graphQL}` + `admin.importMap`. Default admin `/admin` = leave routes default.
+- **Config:** remove `@payloadcms/bundler-webpack` + `admin.bundler` (v3 doesn't bundle admin). `buildConfig`
+  imported from `'payload'`.
+- **R2 storage:** `@payloadcms/storage-s3` (NOT storage-r2, which is for CF Workers). Config:
+  `{ region:'auto', endpoint: R2_ENDPOINT, forcePathStyle:true, credentials:{...} }`, per-collection
+  `disablePayloadAccessControl:true` + `generateFileURL` → `${R2_PUBLIC_URL}/${key}` for public images.
+  Plugin also supports `signedDownloads` (not needed — images are public).
+- **Clerk feasibility (F2) CONFIRMED:** Payload 3 supports collection `auth.strategies: [customStrategy]`
+  where `authenticate({ payload, headers }) => { user }` (+ optional `responseHeaders`), and
+  `auth.disableLocalStrategy: true` to kill password auth. → a Clerk strategy that verifies the Clerk
+  session from headers and returns the Payload user is the sanctioned path. **The whole Clerk-everywhere plan is viable.**
+- **Type imports:** Payload 3 exports `CollectionConfig`, `Access`, `Strategy`, hook types from `'payload'`
+  (NOT `payload/types` or `payload/dist/...`). Fix these import paths when porting collections.
+- **Node:** Payload 3 needs Node `^18.20.2 || >=20.9.0` → pin **Node 20** on Vercel.
+- **Slate:** `@payloadcms/richtext-slate` has v3 releases (Lexical is the v3 default). High confidence; confirm
+  exact version at F1.3. If friction, Lexical is the fallback (would need rich-text data conversion — avoid).
 
 ### F2 — Clerk auth + multi-tenancy + isolation  ⚪
 - Clerk provider + middleware; **Payload custom auth strategy** trusting Clerk sessions (unifies /admin,
@@ -182,10 +205,11 @@ Commerce + auth + money + isolation → verify end-to-end at each gate:
 
 ## Current Status  ← update every session
 - **Phase:** Phase 0 / F1 in progress. Plan approved. Working on branch `feat/payload3-foundation`.
-- **Done:** F1.0 (this tracker committed to repo).
-- **Next concrete step:** F1.1 — Payload 3 migration spike: verify current Payload 3 APIs (init pattern,
-  admin/api route mounts, hook/access-control signatures, Slate v3 adapter, S3/R2 adapter config, Node≥20)
-  against current docs; record findings in this file, then F1.2 spec.
+- **Done:** F1.0 (tracker committed); F1.1 (Payload 3 spike — all critical assumptions verified, incl.
+  Clerk custom-strategy feasibility; findings recorded above).
+- **Next concrete step:** F1.2 — write the F1 foundation spec to `docs/superpowers/specs/` (concrete file
+  moves/creates/deletes, config diffs, env vars) and self-review; F1 architecture eng-review deferred with
+  the commerce eng-review is fine, but a light spec review before F1.3 build is worth it.
 - **Settled:** multi-currency IN at MVP (P6); guest checkout allowed; Connect = separate charges & transfers.
 - **Deferred rigor:** full commerce-architecture eng-review (Connect split, order-split, multi-currency ×
   Tax × transfers) runs before Phase-1 build, not now (F1/F2 don't depend on those contested decisions).
