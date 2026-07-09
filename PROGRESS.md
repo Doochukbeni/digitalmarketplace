@@ -229,7 +229,7 @@ Commerce + auth + money + isolation → verify end-to-end at each gate:
 7. Automated tests: webhook/order-split, access-control + tenant predicates, price/fee/tax math, inventory.
 
 ## Current Status  ← update every session
-- **Phase:** Phase 0 / F1 nearly done. Branch `feat/payload3-foundation`.
+- **Phase:** Phase 0. Branch `feat/payload3-foundation` → **PR #1** (https://github.com/Doochukbeni/digitalmarketplace/pull/1) open for review (F1 + F2.4).
 - **Done:** F1.0–F1.5 complete; F1.6 build-green (exit 0). The full Payload 2→3 + Next 16 + React 19 + tRPC 11
   migration compiles and builds; Express removed; R2 wired.
 - **Next concrete step:** finish F1.6 runtime verification once a real MongoDB + Vercel env are available
