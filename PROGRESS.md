@@ -117,6 +117,11 @@ replaced in F2.** Spike first to verify Payload 3 API specifics.
 - [x] **F1.1** Spike: Payload 3 APIs verified against current docs (see findings below)
 - [x] **F1.2** Spec written + self-reviewed → `docs/superpowers/specs/2026-07-09-payload3-foundation-design.md` (F1 architecture eng-review rides with the Phase-1 commerce eng-review)
 - [ ] **F1.3** Deps + `payload.config.ts` (no webpack; Mongo, Slate, R2; `/admin`)
+  - **Resolved dependency set (verified on npm 2026-07-09):** `payload@3.85.2` + all `@payloadcms/*@3.85.2`
+    (`next`, `db-mongodb`, `richtext-slate` ✓exists, `storage-s3`, `email-nodemailer`, `ui`); `graphql@^16.8.1`;
+    **`next@16.2.10`** (Payload 3.85 supports `>=16.2.6 <17`) → **React 19** (`react`/`react-dom`/`@types/*@^19`);
+    add `sharp`. Remove `@payloadcms/bundler-webpack`, `express`, `body-parser`, `@types/express`, `nodemon`,
+    `copyfiles`. Watch: React-19 peers may force bumps of `@radix-ui/*`, `@tanstack/react-query` (v4→v5), `lucide-react`.
 - [ ] **F1.4** Port collections; Payload 3 init; admin/api routes; delete Express plumbing + dist + scripts
 - [ ] **F1.5** R2 image storage; `next.config.mjs` remotePatterns
 - [ ] **F1.6** Green local run + green Vercel preview
