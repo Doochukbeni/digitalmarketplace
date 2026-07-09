@@ -122,6 +122,11 @@ replaced in F2.** Spike first to verify Payload 3 API specifics.
     **`next@16.2.10`** (Payload 3.85 supports `>=16.2.6 <17`) → **React 19** (`react`/`react-dom`/`@types/*@^19`);
     add `sharp`. Remove `@payloadcms/bundler-webpack`, `express`, `body-parser`, `@types/express`, `nodemon`,
     `copyfiles`. Watch: React-19 peers may force bumps of `@radix-ui/*`, `@tanstack/react-query` (v4→v5), `lucide-react`.
+  - **⚠️ Dependency cascade discovered:** React 19 → `@tanstack/react-query` v5 → **tRPC v10 → v11** (tRPC v10
+    pins React Query v4). So F1.3 also entails a **tRPC v11 migration** (`@trpc/*@^11`): `Providers.tsx`,
+    `trpc/client.ts`, `trpc/index.ts`, routers, and `app/api/trpc/[trpc]/route.ts` need the v11 API. Radix
+    packages also bump to React-19-compatible latest. This makes F1.3/F1.4 a multi-step, build-breaking
+    migration requiring iterative `next build` fix cycles — not a one-shot install.
 - [ ] **F1.4** Port collections; Payload 3 init; admin/api routes; delete Express plumbing + dist + scripts
 - [ ] **F1.5** R2 image storage; `next.config.mjs` remotePatterns
 - [ ] **F1.6** Green local run + green Vercel preview
