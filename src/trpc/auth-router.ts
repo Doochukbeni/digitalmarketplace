@@ -70,9 +70,11 @@ export const authRouter = router({
         });
 
         if (result.token) {
+          const secure = process.env.NODE_ENV === "production" ? " Secure;" : "";
+          const maxAge = 60 * 60 * 24 * 7; // 7 days
           ctx.resHeaders.append(
             "Set-Cookie",
-            `payload-token=${result.token}; Path=/; HttpOnly; SameSite=Lax`
+            `payload-token=${result.token}; Path=/; HttpOnly; SameSite=Lax;${secure} Max-Age=${maxAge}`
           );
         }
 
