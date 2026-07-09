@@ -1,13 +1,12 @@
-import { BeforeChangeHook } from "payload/dist/collections/config/types";
 import { PRODUCT_CATEGORIES } from "../../config";
-import { CollectionConfig } from "payload/types";
+import type { CollectionConfig, CollectionBeforeChangeHook } from "payload";
 import { Product } from "../../payload-types";
 import { stripe } from "../../lib/stripe";
 
-const addUser: BeforeChangeHook<Product> = async ({ req, data }) => {
+const addUser: CollectionBeforeChangeHook<Product> = async ({ req, data }) => {
   const user = req.user;
 
-  return { ...data, user: user.id };
+  return { ...data, user: user?.id };
 };
 
 export const Products: CollectionConfig = {
@@ -106,9 +105,9 @@ export const Products: CollectionConfig = {
       type: "select",
       defaultValue: "pending",
       access: {
-        create: ({ req }) => req.user.role === "admin",
-        read: ({ req }) => req.user.role === "admin",
-        update: ({ req }) => req.user.role === "admin",
+        create: ({ req }) => req.user?.role === "admin",
+        read: ({ req }) => req.user?.role === "admin",
+        update: ({ req }) => req.user?.role === "admin",
       },
       options: [
         {

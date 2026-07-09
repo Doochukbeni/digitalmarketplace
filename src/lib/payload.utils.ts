@@ -1,22 +1,13 @@
-import { User } from "../payload-types";
-import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
-import { NextRequest } from "next/server";
+import { headers as nextHeaders } from "next/headers";
+import { getPayloadClient } from "@/get-payload";
+import type { User } from "../payload-types";
 
-export const getServerSideUser = async (
-  cookies: NextRequest["cookies"] | ReadonlyRequestCookies
-) => {
-  const token = cookies.get("payload-token")?.value;
+// Payload 3 local auth: resolves the current user in-process from the request
+// headers/cookies (no HTTP hop to /api/users/me). Replaced by Clerk in F2.
+export const getServerSideUser = async () => {
+  const payload = await getPayloadClient();
+  const headers = await nextHeaders();
+  const { user } = await payload.auth({ headers });
 
-  const meRes = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/me`,
-    {
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    }
-  );
-
-  const { user } = (await meRes.json()) as { user: User | null };
-
-  return { user };
+  return { user: (user as unknown as User | null) ?? null };
 };

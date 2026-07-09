@@ -57,19 +57,24 @@ export const authRouter = router({
     .input(AuthCredentialValidator)
     .mutation(async ({ input, ctx }) => {
       const { email, password } = input;
-      const { res } = ctx;
 
       const payload = await getPayloadClient();
 
       try {
-        await payload.login({
+        const result = await payload.login({
           collection: "users",
           data: {
             email,
             password,
           },
-          res,
         });
+
+        if (result.token) {
+          ctx.resHeaders.append(
+            "Set-Cookie",
+            `payload-token=${result.token}; Path=/; HttpOnly; SameSite=Lax`
+          );
+        }
 
         return { success: true };
       } catch (error) {

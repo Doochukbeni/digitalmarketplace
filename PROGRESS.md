@@ -127,9 +127,22 @@ replaced in F2.** Spike first to verify Payload 3 API specifics.
     `trpc/client.ts`, `trpc/index.ts`, routers, and `app/api/trpc/[trpc]/route.ts` need the v11 API. Radix
     packages also bump to React-19-compatible latest. This makes F1.3/F1.4 a multi-step, build-breaking
     migration requiring iterative `next build` fix cycles — not a one-shot install.
-- [ ] **F1.4** Port collections; Payload 3 init; admin/api routes; delete Express plumbing + dist + scripts
-- [ ] **F1.5** R2 image storage; `next.config.mjs` remotePatterns
-- [ ] **F1.6** Green local run + green Vercel preview
+- [x] **F1.3** Deps installed (Payload 3.85 / Next 16.2 / React 19.2 / tRPC 11 / tanstack 5 / Radix bumped);
+  `payload.config.ts` rewritten (no webpack, Mongo, Slate, R2 storage, nodemailer adapter, sharp, default `/admin`);
+  `get-payload.ts` → `getPayload({ config })`.
+- [x] **F1.4** Collections ported (import paths `payload/*` → `payload`, `req.user` null-guards, Payload-3 upload/admin
+  fixes); `app/(payload)` route group scaffolded; storefront moved into `app/(app)` group (multiple root layouts);
+  tRPC migrated to v11 + `payload.auth` context; Stripe webhook → `app/api/webhooks/stripe/route.ts`; deleted
+  `server.ts`/`next-utils.ts`/`webhooks.ts`/`nodemon.json`/`tsconfig.server.json`/`dist/`; scripts → `next` only.
+- [x] **F1.5** R2 image storage wired via `@payloadcms/storage-s3` (public `generateFileURL`); `next.config.mjs`
+  wrapped with `withPayload` + R2 remotePattern.
+- [~] **F1.6** `next build` **GREEN (exit 0, 14 routes)**. REMAINING (needs real infra, user-side): live run against a
+  real MongoDB (admin loads / login / product CRUD / R2 upload), and a green Vercel preview deploy with env vars set.
+  - **Known follow-ups:** `payload generate:types`/`generate:importmap` CLI errors on relative-import resolution
+    (`Cannot find module './collections/users'`) — non-blocking (build uses `as unknown` casts + empty importMap);
+    fix before relying on generated types. `lucide-react@^1.23.0` resolved but unverified visually.
+  - **F1 build-verification notes:** storefront `(app)/layout.tsx` set `dynamic = "force-dynamic"` (user resolved via
+    Payload local API at request time, so no DB hit at build); placeholder `.env` added (gitignored).
 
 #### F1.1 Spike findings (verified against Payload docs, v3.85 era)
 - **Init:** `import { getPayload } from 'payload'` + `import config from '@payload-config'` →
@@ -214,12 +227,13 @@ Commerce + auth + money + isolation → verify end-to-end at each gate:
 7. Automated tests: webhook/order-split, access-control + tenant predicates, price/fee/tax math, inventory.
 
 ## Current Status  ← update every session
-- **Phase:** Phase 0 / F1 in progress. Plan approved. Working on branch `feat/payload3-foundation`.
-- **Done:** F1.0 (tracker committed); F1.1 (Payload 3 spike — all critical assumptions verified, incl.
-  Clerk custom-strategy feasibility; findings recorded above).
-- **Next concrete step:** F1.2 — write the F1 foundation spec to `docs/superpowers/specs/` (concrete file
-  moves/creates/deletes, config diffs, env vars) and self-review; F1 architecture eng-review deferred with
-  the commerce eng-review is fine, but a light spec review before F1.3 build is worth it.
+- **Phase:** Phase 0 / F1 nearly done. Branch `feat/payload3-foundation`.
+- **Done:** F1.0–F1.5 complete; F1.6 build-green (exit 0). The full Payload 2→3 + Next 16 + React 19 + tRPC 11
+  migration compiles and builds; Express removed; R2 wired.
+- **Next concrete step:** finish F1.6 runtime verification once a real MongoDB + Vercel env are available
+  (admin login, product CRUD, R2 upload, preview deploy). Then start **F2** (Clerk auth + multi-tenancy).
+- **Blocked-on-user (infra):** MongoDB connection string, Cloudflare R2 bucket/keys, Vercel project env — needed
+  to run/deploy. Sandbox has no DB, so live run couldn't be executed here.
 - **Settled:** multi-currency IN at MVP (P6); guest checkout allowed; Connect = separate charges & transfers.
 - **Deferred rigor:** full commerce-architecture eng-review (Connect split, order-split, multi-currency ×
   Tax × transfers) runs before Phase-1 build, not now (F1/F2 don't depend on those contested decisions).

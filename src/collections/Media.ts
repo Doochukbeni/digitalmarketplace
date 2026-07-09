@@ -1,16 +1,16 @@
 import { User } from "../payload-types";
-import { Access, CollectionConfig } from "payload/types";
+import type { Access, CollectionConfig } from "payload";
 
 const isAdminorHasAccessToImages =
   (): Access =>
   async ({ req }) => {
-    const user = req.user as User | undefined;
+    const user = req.user as unknown as User | undefined;
     if (!user) return false;
     if (user.role === "admin") return true;
 
     return {
       user: {
-        equals: req.user.id,
+        equals: user.id,
       },
     };
   };
@@ -20,13 +20,13 @@ export const Media: CollectionConfig = {
   hooks: {
     beforeChange: [
       ({ req, data }) => {
-        return { ...data, user: req.user.id };
+        return { ...data, user: req.user?.id };
       },
     ],
   },
   access: {
     read: async ({ req }) => {
-      const referer = req.headers.referer;
+      const referer = req.headers.get("referer");
       if (!req.user || !referer?.includes("sell")) {
         return true;
       }
@@ -36,10 +36,9 @@ export const Media: CollectionConfig = {
     update: isAdminorHasAccessToImages(),
   },
   admin: {
-    hidden: ({ user }) => user.role !== "admin",
+    hidden: ({ user }) => user?.role !== "admin",
   },
   upload: {
-    staticURL: "/media",
     staticDir: "media",
     imageSizes: [
       {
