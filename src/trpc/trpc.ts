@@ -1,18 +1,25 @@
-import { User } from "@/payload-types";
-import { ExpressContext } from "@/server";
 import { initTRPC, TRPCError } from "@trpc/server";
-import { PayloadRequest } from "payload/types";
+import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
+import { getPayloadClient } from "@/get-payload";
+import type { User } from "@/payload-types";
 
-const t = initTRPC.context<ExpressContext>().create();
+// Payload 3 has no Express middleware populating `req.user`. We derive the
+// authenticated user from the request headers via Payload's local auth.
+// (In F2 this same call is backed by the Clerk custom auth strategy.)
+export const createContext = async ({ req, resHeaders }: FetchCreateContextFnOptions) => {
+  const payload = await getPayloadClient();
+  const { user } = await payload.auth({ headers: req.headers });
+  return { req, resHeaders, user: (user as unknown as User | null) ?? null };
+};
+
+export type Context = Awaited<ReturnType<typeof createContext>>;
+
+const t = initTRPC.context<Context>().create();
 
 const middleware = t.middleware;
 
 const isAuth = middleware(async ({ ctx, next }) => {
-  const req = ctx.req as PayloadRequest;
-
-  const { user } = req as { user: User | null };
-
-  if (!user || !user.id) {
+  if (!ctx.user || !ctx.user.id) {
     throw new TRPCError({
       message: "you are not logged in",
       code: "UNAUTHORIZED",
@@ -21,7 +28,7 @@ const isAuth = middleware(async ({ ctx, next }) => {
 
   return next({
     ctx: {
-      user,
+      user: ctx.user,
     },
   });
 });

@@ -57,19 +57,26 @@ export const authRouter = router({
     .input(AuthCredentialValidator)
     .mutation(async ({ input, ctx }) => {
       const { email, password } = input;
-      const { res } = ctx;
 
       const payload = await getPayloadClient();
 
       try {
-        await payload.login({
+        const result = await payload.login({
           collection: "users",
           data: {
             email,
             password,
           },
-          res,
         });
+
+        if (result.token) {
+          const secure = process.env.NODE_ENV === "production" ? " Secure;" : "";
+          const maxAge = 60 * 60 * 24 * 7; // 7 days
+          ctx.resHeaders.append(
+            "Set-Cookie",
+            `payload-token=${result.token}; Path=/; HttpOnly; SameSite=Lax;${secure} Max-Age=${maxAge}`
+          );
+        }
 
         return { success: true };
       } catch (error) {
