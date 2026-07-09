@@ -2,12 +2,14 @@ import { mongooseAdapter } from "@payloadcms/db-mongodb";
 import { slateEditor } from "@payloadcms/richtext-slate";
 import { s3Storage } from "@payloadcms/storage-s3";
 import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
+import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
 import path from "path";
 import { fileURLToPath } from "url";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 
 import { Users } from "./collections/users";
+import { Tenants } from "./collections/Tenants";
 import { Products } from "./collections/products/Products";
 import { Media } from "./collections/Media";
 import { ProductFiles } from "./collections/Productfile";
@@ -25,7 +27,7 @@ const generateR2FileURL =
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || "",
   secret: process.env.PAYLOAD_SECRET || "",
-  collections: [Users, Products, Media, ProductFiles, Orders],
+  collections: [Users, Tenants, Products, Media, ProductFiles, Orders],
   admin: {
     user: "users",
     meta: {
@@ -51,6 +53,20 @@ export default buildConfig({
     },
   }),
   plugins: [
+    // Per-seller multi-tenancy: adds a `tenant` field to the scoped collections
+    // and a tenants array to users, and filters access by the user's tenants.
+    // Orders are intentionally NOT tenant-scoped here — a buyer cart spans
+    // multiple sellers, so tenancy on orders is modeled via per-seller
+    // sub-orders in the commerce phase (P4).
+    multiTenantPlugin({
+      collections: {
+        products: {},
+        media: {},
+        product_files: {},
+      },
+      userHasAccessToAllTenants: (user) =>
+        (user as { role?: string } | null)?.role === "admin",
+    }),
     s3Storage({
       enabled: Boolean(process.env.R2_BUCKET),
       collections: {

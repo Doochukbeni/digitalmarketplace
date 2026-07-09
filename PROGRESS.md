@@ -176,11 +176,13 @@ replaced in F2.** Spike first to verify Payload 3 API specifics.
   access control + reusable `isAdmin`/`isSellerOfTenant`/`isBuyerOrPublic` helpers (also closes the review's
   world-readable-users + unguarded-`req.user` holes).
 - Seller onboarding: self-serve signup → `pending` tenant → admin approval in `/admin` → publishable.
-- [ ] **F2.1** Spec (roles/claims model) + eng-review
-- [ ] **F2.2** Clerk install + provider + middleware + custom Payload strategy
+- [x] **F2.1** Spec written → `docs/superpowers/specs/2026-07-09-f2-auth-multitenancy-design.md`
+- [ ] **F2.2** Clerk install (done) + provider + middleware + custom Payload strategy — NEXT (needs Clerk keys to verify)
 - [ ] **F2.3** Clerk webhook + user/role/tenant sync; swap auth pages
-- [ ] **F2.4** Multi-tenant plugin + `tenants` + tenant fields
-- [ ] **F2.5** Tenant-aware access control + helpers
+- [x] **F2.4** Multi-tenant plugin + `tenants` collection + tenant fields on products/media/product_files — **build-green**.
+  Orders intentionally NOT tenant-scoped (cross-tenant cart → per-seller sub-orders in P4). `userHasAccessToAllTenants =
+  role==='admin'`.
+- [ ] **F2.5** Tenant-aware access control + reusable `isAdmin`/`isSellerOfTenant` helpers
 - [ ] **F2.6** Seller onboarding + admin approval flow
 - [ ] **F2.7** Verify isolation: seller A cannot touch seller B's data
 
