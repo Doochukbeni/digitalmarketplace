@@ -115,7 +115,7 @@ Payload API `app/(payload)/api/...`, tRPC + webhooks as route handlers), R2 for 
 replaced in F2.** Spike first to verify Payload 3 API specifics.
 - [x] **F1.0** Materialize tracker → repo `PROGRESS.md` + commit
 - [x] **F1.1** Spike: Payload 3 APIs verified against current docs (see findings below)
-- [ ] **F1.2** Spec + eng-review
+- [x] **F1.2** Spec written + self-reviewed → `docs/superpowers/specs/2026-07-09-payload3-foundation-design.md` (F1 architecture eng-review rides with the Phase-1 commerce eng-review)
 - [ ] **F1.3** Deps + `payload.config.ts` (no webpack; Mongo, Slate, R2; `/admin`)
 - [ ] **F1.4** Port collections; Payload 3 init; admin/api routes; delete Express plumbing + dist + scripts
 - [ ] **F1.5** R2 image storage; `next.config.mjs` remotePatterns
